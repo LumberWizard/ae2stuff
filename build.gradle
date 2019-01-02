@@ -20,13 +20,12 @@ buildscript {
     }
     dependencies {
         classpath 'net.minecraftforge.gradle:ForgeGradle:2.3-SNAPSHOT'
-        classpath "gradle.plugin.com.matthewprenger:CurseGradle:1.0.9"
+        //classpath "gradle.plugin.com.matthewprenger:CurseGradle:1.0.9"
     }
 }
 
-apply plugin: 'scala'
 apply plugin: 'net.minecraftforge.gradle.forge'
-apply plugin: 'com.matthewprenger.cursegradle'
+//apply plugin: 'com.matthewprenger.cursegradle'
 
 file "build.properties" withReader {
     def prop = new Properties()
@@ -54,16 +53,11 @@ minecraft {
     mappings = "${config.minecraft.mappings}"
     useDepAts = true
     makeObfSourceJar = false
-    replace("BDLIB_VER", config.bdlib.version)
     replace("AE2STUFF_VER", simpleVersion.toString())
 }
 
 repositories {
     mavenCentral()
-    maven {
-        name = "bdew"
-        url = "https://jenkins.bdew.net/maven"
-    }
     maven {
         name "JEI"
         url "http://dvs1.progwml6.com/files/maven"
@@ -72,34 +66,17 @@ repositories {
         name "HWYLA"
         url "http://tehnut.info/maven"
     }
-    ivy {
-        name "AE2"
-        artifactPattern "http://addons-origin.cursecdn.com/files/${config.ae2.cf}/[module]-[revision](-[classifier])(.[ext])"
-    }
 }
 
 dependencies {
-    compile "net.bdew:bdlib:${config.bdlib.version}-mc${config.minecraft.version}:dev"
-
     deobfCompile "mezz.jei:jei_${config.minecraft.version}:${config.jei.version}"
     deobfCompile "mcp.mobius.waila:Hwyla:${config.hwyla.version}"
 
-    deobfCompile ":appliedenergistics2:${config.ae2.version}@jar"
+    deobfCompile "appeng:appliedenergistics2:${config.ae2.version}"
 
 }
 
 import org.apache.tools.ant.filters.ReplaceTokens
-
-sourceSets {
-    main {
-        scala {
-            srcDir 'src'
-        }
-        resources {
-            srcDir 'resources'
-        }
-    }
-}
 
 processResources {
     inputs.property "tokens", minecraft.replacements
@@ -129,11 +106,6 @@ jar {
     exclude "**/*.psd"
 }
 
-afterEvaluate { project ->
-    // Fudge the inputs of api/source jars so we get the version after replacements
-    tasks.getByPath(":sourceJarReal").from(tasks.getByPath(":sourceMainScala").outputs.files)
-}
-
 artifacts {
     archives sourceJarReal
     archives deobfJar
@@ -155,36 +127,35 @@ publishing {
     }
 }
 
-curseforge {
-    apiKey = project.hasProperty("curseForgeApiKey") ? project.curseForgeApiKey : ""
-    project {
-        id = config.curseforge.id
+// curseforge {
+//     apiKey = project.hasProperty("curseForgeApiKey") ? project.curseForgeApiKey : ""
+//     project {
+//         id = config.curseforge.id
 
-        releaseType = "alpha"
-        changelog = project.hasProperty("changelog") ? project.changelog : "No changelog available"
+//         releaseType = "alpha"
+//         changelog = project.hasProperty("changelog") ? project.changelog : "No changelog available"
 
-        addGameVersion config.minecraft.version
-        addGameVersion "1.12"
-        addGameVersion "1.12.2"
+//         addGameVersion config.minecraft.version
+//         addGameVersion "1.12"
+//         addGameVersion "1.12.2"
 
 
-        mainArtifact(jar) {
-            displayName = "AE2Stuff ${simpleVersion} (MC ${config.minecraft.version})"
-        }
+//         mainArtifact(jar) {
+//             displayName = "AE2Stuff ${simpleVersion} (MC ${config.minecraft.version})"
+//         }
 
-        addArtifact(deobfJar) {
-            displayName = "AE2Stuff ${simpleVersion} Deobfuscated (MC ${config.minecraft.version})"
-        }
+//         addArtifact(deobfJar) {
+//             displayName = "AE2Stuff ${simpleVersion} Deobfuscated (MC ${config.minecraft.version})"
+//         }
 
-        addArtifact(sourceJarReal) {
-            displayName = "AE2Stuff ${simpleVersion} Source (MC ${config.minecraft.version})"
-        }
+//         addArtifact(sourceJarReal) {
+//             displayName = "AE2Stuff ${simpleVersion} Source (MC ${config.minecraft.version})"
+//         }
 
-        relations {
-            requiredLibrary 'bdlib'
-            requiredLibrary 'applied-energistics-2'
-            optionalLibrary 'waila'
-            optionalLibrary 'just-enough-items-jei'
-        }
-    }
-}
+//         relations {
+//             requiredLibrary 'applied-energistics-2'
+//             optionalLibrary 'waila'
+//             optionalLibrary 'just-enough-items-jei'
+//         }
+//     }
+// }
